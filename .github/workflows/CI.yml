@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build (Windows, ${{ matrix.configuration }}) # runner.os doesn't work here
+    name: Build (Windows, ${{ matrix.configuration }})
     runs-on: windows-2025
     env:
       POWERSHELL_TELEMETRY_OPTOUT: 1
@@ -39,10 +39,8 @@ jobs:
       - name: Build
         run: cmake --build build --config ${{ matrix.configuration }} -j $env:NUMBER_OF_PROCESSORS
       - name: Prepare artifacts
-        if: matrix.configuration == 'Release'
         run: cmake --install build --config ${{ matrix.configuration }} --prefix artifacts
       - uses: actions/upload-artifact@v4
-        if: matrix.configuration == 'Release'
         with:
           name: CxbxReloaded-${{ matrix.configuration }}
           path: artifacts/bin
