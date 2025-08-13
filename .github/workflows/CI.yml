@@ -74,3 +74,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create ${{ steps.zip.outputs.tag_name }} artifacts/*.zip -p --target $GITHUB_SHA --title '${{ steps.zip.outputs.tag_name }}'
+        
