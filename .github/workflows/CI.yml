@@ -22,7 +22,7 @@ on:
 
 jobs:
   build-windows:
-    name: Build (Windows, ${{ matrix.configuration }})
+    name: Build (Windows, ${{ matrix.configuration }}) # runner.os doesn't work here
     runs-on: windows-2025
     env:
       POWERSHELL_TELEMETRY_OPTOUT: 1
@@ -59,19 +59,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           path: artifacts
-      - name: Re-zip artifacts
+      - name: Re-zip Release artifact
         id: zip
         run: |
-          for artifact in artifacts/*; do
-            7z a ${artifact}.zip "./${artifact}/*"
-            if [ $(stat -c %s ${artifact}.zip) -le 100000 ]; then
+          # Process only the Release artifact
+          artifact="artifacts/CxbxReloaded-Release"
+          if [ -d "$artifact" ]; then
+            7z a "${artifact}.zip" "./${artifact}/*"
+            if [ $(stat -c %s "${artifact}.zip") -le 100000 ]; then
               echo "Error: Archive ${artifact}.zip too small!"
               exit 1
             fi
-          done
+          else
+            echo "Error: Release artifact not found at $artifact"
+            exit 1
+          fi
           echo "tag_name=CI-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
       - name: Create Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release create ${{ steps.zip.outputs.tag_name }} artifacts/*.zip -p --target $GITHUB_SHA --title '${{ steps.zip.outputs.tag_name }}'
-        
